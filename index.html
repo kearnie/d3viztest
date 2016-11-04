@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+svg {
+  display: block;
+  margin: 10px auto 0;
+}
+circle.main-circle {
+  stroke: #E6E6E6;
+  stroke-width: 1px;
+  fill: none;
+}
+circle.node {
+  fill: #D3DEE8;
+  fill-opacity: .6;
+}
+text.node {
+  font: 100 9px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 9px;
+  stroke: none;
+  fill: #CCC;
+}
+path.edge {
+  stroke-width: 1px;
+  stroke-opacity: .2;
+  stroke: steelblue;
+  fill: none;
+}
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="./circleGraph.js"></script>
+<script>
+
+var radius = 250;
+var margin = 300;
+var outerRadius = radius + margin;
+  
+
+d3.json("graphFile.json", function(json) {
+  nodes = json.nodes;
+  edges = json.links;
+var circleGraph = d3.layout.circleGraph()
+  .tension(0.2)
+  .radius(radius)
+  .nodes(nodes)
+  .edges(edges);
+
+var svg = d3.select('body')
+  .append('svg')
+  .attr('width', outerRadius * 2)
+  .attr('height', outerRadius * 2)
+  .append('g')
+  .attr('transform', 'translate(' + outerRadius + ', ' + outerRadius + ')');
+
+// draw main circle
+svg.append('circle')
+  .classed('main-circle', true)
+  .attr('r', radius);
+
+// draw edges
+svg.selectAll('path.edge')
+  .data(edges)
+  .enter()
+    .append('path')
+    .classed('edge', true)
+    .attr('d', circleGraph.line);
+
+// draw circles
+svg.selectAll('circle.node')
+  .data(nodes)
+  .enter()
+    .append('circle')
+    .classed('node', true)
+    .attr('r', 5)
+    .attr('cx', function (d) { return d.x; })
+    .attr('cy', function (d) { return d.y; });
+
+// draw labels
+svg.selectAll('text.node')
+  .data(nodes)
+  .enter()
+    .append('text')
+    .classed('node', true)
+    .attr({
+      'text-anchor': function (d) {
+        return (Math.sin(d.radians) < 0) ? 'end' : 'begin';
+      },
+      dy: '0.3em',
+      dx: function(d) {
+        return (Math.sin(d.radians) < 0) ? '-1em' : '1em';
+      },
+      transform: function (d) {
+        var degrees = -d.degrees + 90;
+        var xTranslate = radius;
+        if (Math.sin(d.radians) < 0) {
+          degrees -= 180;
+          xTranslate *= -1;
+        }
+        return 'rotate(' + degrees + ') translate(' + xTranslate + ', 0)';
+      }
+    })
+    .text(function(d) {
+      return d.name;
+    });
+});
+
+// Create
+
+
+</script>
